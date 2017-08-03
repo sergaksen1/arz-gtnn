@@ -1,0 +1,26 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<link rel="stylesheet" type="text/css" href="{% static "foundation/css/foundation.min.css" %}">
+<head>
+    <meta charset="UTF-8">
+    <title>Оборудование ЗИП</title>
+</head>
+<body>
+<p>Это, мать его, моё первое приложение.</p>
+<br><br><br><br><br><br>
+{% block content %}
+
+    <p>Это, мать его, моё первое приложение.</p>
+
+{% endblock %}
+
+<script src="{% static "foundation/js/vendor/jquery.js" %}"></script>
+<script src="{% static "foundation/js/vendor/foundation.js" %}"></script>
+<script>
+    $(document).foundation();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+{% extends 'zip.html' %}
+{% load staticfiles %}
+{% block content %}
+    
+    <img src="{% static "images/i.jpg" %}"/><br>
+    <img src="{% static "images/img_6540.jpg" %}" width="320"/>
+    <p>Здесь будут отзывы пользователей.</p>
+    <table>
+        {% for m in mes %}
+            <tr>
+                <td>
+                    {{ m.tema }}
+                </td>
+                <td>
+                    {{ m.otzyv }}
+                </td>
+                <td>
+                    {{ m.ot_date }}
+                </td>
+            </tr>
+         {% endfor %}
+    </table>
+
+<p>Введите свой отзыв:</p><br>
+    <form method="POST" action="/gb/send/">
+        {% csrf_token %}
+        <input type="text" name="tema"><br><br>
+        <input type="text" name="otzyv"><br><br>
+        <input type="submit" value="Отправить">
+    </form>
+{% endblock %}
+
