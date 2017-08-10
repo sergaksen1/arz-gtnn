@@ -1,0 +1,45 @@
+{% load staticfiles %}
+
+{% block content %}
+
+<h4>Каталог ЗИП</h4>
+<a href="{% url 'zip:add' %}">Добавить ЗИП.</a>
+ <table class="table-scroll">
+  <thead>
+    <tr>
+      <th>№</th>
+      <th>ТИП</th>
+      <th>Наименование</th>
+      <th>Дата добавления</th>
+      <th>Кто</th>
+      <th>Система</th>
+    </tr>
+  </thead>
+    <tr>
+        <td><a href="#">1</a></td>
+        <td><a href="#">HDD</a></td>
+        <td><a href="#">Жесткий диск</a></td>
+        <td><a href="#">01.02.2015</a></td>
+        <td><a href="#">Аксенов С.В.</a></td>
+        <td><a href="#">СПУРТ</a></td>
+    </tr>
+     <tr>
+        <td><a href="#">2</a></td>
+        <td><a href="#">Блок питания</a></td>
+        <td><a href="#">Блок питания сервера SUN</a></td>
+        <td><a href="#">03.02.2014</a></td>
+        <td><a href="#">Аксенов С.В.</a></td>
+        <td><a href="#">Ямал-2М</a></td>
+    </tr>
+
+
+
+
+ </table>
+
+
+
+
+
+
+{% endblock %}

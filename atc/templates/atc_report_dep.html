@@ -1,0 +1,175 @@
+{% extends "gtnn_main.html" %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div class="large-12 column" style="box-shadow:0 0 10px; margin-bottom:1rem; padding:0">
+	 <div>
+	{# Синий заголовок приложения #}
+	<div class="large-12 column" style="background-color:#0079c2; color:white">
+	<h4>Отчет: "Путевые листы."</h4>
+	<form method="post" action="{% url "atc:report_dep" %}">
+	{% csrf_token %}
+	<div class="row">
+		<div class="large-2 medium-3 small-4 columns">
+			<label><span style="color:white">Начало периода:</span>
+			<input type="text" value="{{ start_date }}" data-date-format="dd.mm.yyyy" id="dp1" name="start_date">	
+			</label>
+		</div>
+		<div class="large-2 medium-3 small-4 columns">
+			<label><span style="color:white">Конец периода:</span>
+			<input type="text" value="{{ end_date }}" data-date-format="dd.mm.yyyy" id="dp2" name="end_date">
+			</label>
+		</div>
+		<div class="large-8 medium-6 small-4 columns">
+			<label><span style="color:white">Подразделение:</span></label>
+			<select name="depzak">
+			<option value="all" {% if depzak == "all" %}selected{% endif %}>Все подразделения</option>
+			{% for p in dep_list %}
+			   <option value="{{ p.ZakName }}" {% if depzak == p %}selected{% endif %}>{{ p.ZakName }}</option>			
+			{% endfor %}
+			</select>
+		</div>
+		<div class="large-8 medium-6 small-4 columns">
+		</div>		
+	</div>
+	<div class="row">
+		<div class="large-12 columns">
+			<input class="button" type="submit" value="Найти" name="submit">
+			<input class="button" type="button" value="Установить текущий месяц" onclick="SetCurrentMonth();">
+			<input class="button success" type="submit" value="В Excel" name="submit">
+			Для перемещения по таблице используйте стрелки на клавиатуре.
+		</div>
+	</div>	
+	</form>	
+	</div>
+	</div>
+	{# Данные приложения #} 
+	<div class="large-12 column" style="padding:0">
+	<div class="table-scroll">
+	<table class="hover" style="width:100%">
+	<thead class="fixed">
+		<tr>
+		<th>Подразделение</th>
+		<th>Филиал</th>
+		<th>Номер ПЛ</th>
+		<th>Дата учета ПЛ</th>
+		<th>Дата выезда</th>
+		<th>Дата возврата</th>
+		<th>Пробег(город)</th>
+		<th>Пробег(загород)</th>
+		<th>Пробег(бездорожье)</th>
+		<th>Пробег(буксировка)</th>
+		<th>Простой на осн. топливе, ч.</th>
+		<th>Простой на доп. топливе, ч.</th>
+		<th>Расход всего (осн. топливо), л.</th>
+		<th>Расход всего (доп. топливо), л.</th>
+		<th>Расход при простое (осн. топливо), л.</th>
+		<th>Расход при простое (доп. топливо), л.</th>
+		<th>Расход по М/счетчику, л.</th>
+		<th>Осн. топливо (выезд), л.</th>
+		<th>Осн. топливо (возврат), л.</th>
+		<th>Доп. топливо (выезд), л.</th>
+		<th>Доп. топливо (возврат), л.</th>
+		<th>Осн. топливо (заправлено), л.</th>
+		<th>Доп. топливо (заправлено), л.</th>
+		<th>Филиал-поставщик</th>
+		<th>МВЗ-поставщик</th>
+		<th>Тип ТС</th>
+		<th>Номер ПЛ</th>
+		<th>Состояние</th>
+		<th>Водитель</th>
+		<th>Дата создания ПЛ</th>
+		<th>Цель поездки</th>
+		<th>Маршрут</th>
+		<th>Адрес подачи транспорта</th>
+		<th>Режим работы</th>
+		<th>Транспортное средство</th>
+		<th>Государственный номер</th>
+		<th>№ автоколонны</th>
+		<th>Марка осн. топлива</th>
+		<th>Марка доп. топлива</th>
+		<th>Вид осн. топлива</th>
+		<th>Вид доп. топлива</th>
+		<th>Диспетчер</th>
+		</tr>
+	</thead>
+	{% for f in pl_list %}
+	<tr>
+		<td>{{ f.depzak }}</td>
+		<td>{{ f.DBZak }}</td>
+		<td>{{ f.Num }}</td>
+ 		<td>{{ f.Dt  | date:"d.m.Y"}}</td>
+ 		<td>{{ f.DtStart  | date:"d.m.Y"}}</td>
+ 		<td>{{ f.DtEnd | date:"d.m.Y" }}</td>
+ 		<td>{{ f.DistCity }}</td>
+ 		<td>{{ f.DistNoCity }}</td>
+ 		<td>{{ f.DistNoRoad }}</td>
+ 		<td>{{ f.DistTow }}</td>
+ 		<td>{{ f.TimeEngine }}</td>
+ 		<td>{{ f.TimeEngineD }}</td>
+ 		<td>{{ f.ConsumFuel }}</td>
+ 		<td>{{ f.ConsumFuelD }}</td>
+ 		<td>{{ f.ConsumFuelProst }}</td>
+ 		<td>{{ f.ConsumFuelProstD }}</td>
+ 		<td>{{ f.ConsumFuelMoto }}</td>
+ 		<td>{{ f.OstStart }}</td>
+ 		<td>{{ f.OstEnd }}</td>
+ 		<td>{{ f.OstStartD }}</td>
+ 		<td>{{ f.OstEndD }}</td>
+ 		<td>{{ f.Zaprav }}</td>
+ 		<td>{{ f.ZapravD }}</td>
+ 		<td>{{ f.Filial_Info }}</td>
+ 		<td>{{ f.VW_Info }}</td>
+ 		<td>{{ f.TypeTS }}</td>
+ 		<td>{{ f.TypeTS1 }}</td>
+ 		<td>{{ f.State_Info }}</td>
+ 		<td>{{ f.Vodit_Info }}</td>
+ 		<td>{{ f.DtCreate  | date:"d.m.Y"}}</td>
+ 		<td>{{ f.Cel_Info }}</td>
+ 		<td>{{ f.Marsh_Info }}</td>
+ 		<td>{{ f.Address }}</td>
+ 		<td>{{ f.RgWrk }}</td>
+ 		<td>{{ f.TS_Info }}</td>
+ 		<td>{{ f.FRegSignTS }}</td>
+ 		<td>{{ f.NumberAutocade }}</td>
+ 		<td>{{ f.FMarkFuel }}</td>
+ 		<td>{{ f.FMarkAddFuel }}</td>
+ 		<td>{{ f.FTypeFuel }}</td>
+ 		<td>{{ f.FTypeAddFuel }}</td>
+ 		<td>{{ f.Dispatcher_Info }}</td>
+	</tr>
+	{% endfor %}
+    </table>
+    </div>
+	</div>
+	</div>
+	</div>
+
+{% endblock %}
+
+{% block block-js %}
+	<script src="{% static "js/vendor/foundation-datepicker.min.js" %}"></script>
+	<script src="{% static "js/vendor/foundation-datepicker.ru.js" %}"></script>
+	
+	<script>
+		$('.fdatepicker').fdatepicker({language:'ru'});	
+		$(function(){ $('#dp1').fdatepicker({language:'ru'}); });
+		$(function(){ $('#dp2').fdatepicker({language:'ru'}); });
+		
+
+		Date.prototype.daysInMonth = function() {
+				return 33 - new Date(this.getFullYear(), this.getMonth(), 33).getDate();
+			};
+		
+		function SetCurrentMonth() {
+			var now = new Date();
+			var nowY = now.getFullYear();
+			var nowM = now.getMonth();
+			var start_date = '01.'+String(nowM+1)+'.'+String(nowY)
+			var end_date = String(new Date().daysInMonth())+'.'+String(nowM+1)+'.'+String(nowY)
+			$('#dp1').val(start_date)
+			$('#dp2').val(end_date)	
+		}
+	</script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "gtnn_main.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<div class="large-12 column" style="box-shadow:0 0 10px; margin-bottom:1rem; padding:0">
+	{# Синий заголовок приложения #}
+	<div class="large-12 column" style="background-color:#0079c2; color:white">
+	<h4>Автотранспорт.</h4>
+	</div>
+	{# Данные приложения #} 
+	<div class="large-12 column" style="padding:1rem;">
+	<h6>
+	<ul>
+	<li><a href="{% url 'atc:need' %}">Заявки на автотранспорт.</a></li>
+	<li><a href="{% url 'atc:report_dep' %}">Отчет по путевым листам</a></li>
+	<li><a href="http://lpu-02-spf/DocLib3/Локальные ИУС/Автотранспорт">Инструкции</a></li>
+	</ul></h6>
+	
+	
+	</div>
+</div>
+{% endblock %}

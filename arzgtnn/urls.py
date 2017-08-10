@@ -17,8 +17,11 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from zip import urls as zip_urls
 from gb import urls as gb_urls
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^zip/', include(zip_urls)),
+    url(r'^zip/', include('zip.urls', namespace='zip')),
     url(r'^gb/', include(gb_urls)),
 ]

@@ -4,11 +4,19 @@
     <data-source name="db" uuid="447d6fae-fc63-4b27-9f8a-e8083398f7c5">
       <database-info product="SQLite" version="3.16.1" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native" />
       <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <auth-required>false</auth-required>
       <introspection-schemas>*:main</introspection-schemas>
     </data-source>
     <data-source name="db [2]" uuid="2a320ae0-73d1-480c-9cb7-3d4a0658c525">
       <database-info product="SQLite" version="3.16.1" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native" />
       <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <auth-required>false</auth-required>
+      <introspection-schemas>*:main</introspection-schemas>
+    </data-source>
+    <data-source name="Django default" uuid="a334d3ba-2f69-44bd-8e5f-be261f427814">
+      <database-info product="SQLite" version="3.16.1" jdbc-version="2.1" driver-name="SQLiteJDBC" driver-version="native" />
+      <case-sensitivity plain-identifiers="mixed" quoted-identifiers="mixed" />
+      <auth-required>false</auth-required>
       <introspection-schemas>*:main</introspection-schemas>
     </data-source>
   </component>

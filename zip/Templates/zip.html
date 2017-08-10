@@ -9,8 +9,12 @@
 </head>
 <body>
 <p>Это моё первое приложение.</p>
-<br><br><br><br><br><br>
+<br>
 {% block content %}
+{# Синий заголовок приложения #}
+<div class="large-12 column" style="background-color:#0079c2; color:white">
+<h4>Учет ЗИП.</h4>
+</div>
 <div class="row">
   <div class="large-12 сolumns">
       <ul class="vertical medium-horizontal menu" data-responsive-menu="drilldown medium-dropdown">
@@ -41,16 +45,20 @@
     </ul>
   </div>
 </div>
-<div class="row">
-  <div class="large-12 columns"><p>Это, мать его, моё первое приложение.</p></div>
-</div>
-<div class="row">
-  <div class="small-4 large-8 columns"><p>Это, мать его, моё первое приложение.</p></div>
-  <div class="small-6 large-8 columns"><p>Это, мать его, моё второе приложение.</p></div>
-  <div class="small-12 large-2 columns"><p>Это, мать его, моё третье приложение.</p></div>
-</div>
+<div class="large-12 column" style="box-shadow:0 0 10px; margin-bottom:1rem; padding:0">
 
-    <p>Это, мать его, моё первое приложение.</p>
+	{# Данные приложения #}
+	<div class="large-12 column" style="padding:1rem;">
+	<h6>
+	<ul>
+	<li><a href="#">Каталог ЗИП.</a></li>
+	<li><a href="#">Отчет по ЗИП.</a></li>
+	<li><a href="#">Инструкции</a></li>
+	</ul></h6>
+
+
+	</div>
+</div>
 
 {% endblock %}
 

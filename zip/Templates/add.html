@@ -1,0 +1,35 @@
+{% load staticfiles %}
+
+{% block content %}
+
+<h4>Новый ЗИП</h4>
+<a href="{% url 'zip:cat' %}">Каталог ЗИП.</a>
+
+<p>Введите тип ЗИП: <input id="" type="text" required value="{{ Zip_types.zipType_name }}" name="zip_types"></p>
+
+
+
+
+    <div class="reveal" id="" data-reveal>
+  		<h4>Добавить тип</h4>
+  		{% csrf_token %}
+  		<form>
+  		<input id="" type="text" required value="{{ Zip_types.zipType_name }}" name="zip_types">
+  		<button id="" type="button" class="success button" disabled>Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="address_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+
+
+
+
+
+
+
+
+
+
+{% endblock %}

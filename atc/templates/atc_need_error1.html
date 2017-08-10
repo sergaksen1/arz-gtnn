@@ -1,0 +1,16 @@
+{% extends "gtnn_main.html" %}
+
+
+{% block content %}
+
+<div class="row">
+<div class="large-12 columns">
+<h2>Ошибка шаблона!</h2>
+<form>
+<p> Извините, шаблон для данного типа автомобиля не найден. Сообщите об ошибке администратору или выберите другой тип автомобиля и нажмите "Сохранить", а потом повторно распечатайте заявку.</p>
+<button type="submit" class="button" onClick="history.go(-1);return true;">Назад</button>
+</form>
+</div>
+</div>
+<br/>
+{% endblock %}

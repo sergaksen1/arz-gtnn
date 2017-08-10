@@ -1,0 +1,283 @@
+{% extends "gtnn_main.html" %}
+{% load staticfiles %}
+{% block content %}
+
+<div class="column large-12" style="background-color: white; margin-bottom: 1rem; padding:0; box-shadow:0 0 10px">
+
+<form action="{% url 'atc:need' %}" method="GET">
+ 
+    <div class="large-12 column clearfix" style="background-color:#0079c2; color:white">
+    <div class="large-12 column">
+    <h2>Заявки на автотранспорт</h2>
+    </div>
+    
+      <div class="large-12 column">
+      	  <div class="large-2 medium-3 small-6 columns">
+      	  	<label><span style="color:white">Начало периода:</span></label>
+          	<input type="text" value="{{ start_date }}" data-date-format="dd.mm.yyyy" id="dp1" name="start_date">
+          </div>
+          <div class="large-2 medium-3 small-6 columns">
+          	<label><span style="color:white">Конец периода:</span></label>
+			<input type="text" value="{{ end_date }}" data-date-format="dd.mm.yyyy" id="dp2" name="end_date">
+          </div>
+           <div class="large-3 medium-6 columns">
+          	<label><span style="color:white">Подразделение:</span></label>
+			<select name="depzak">
+				<option value="0" {% if depzak == 0 %}selected="selected"{% endif %}>Все подразделения</option>
+					{% for p in dep_list %}
+			   	<option value="{{ p.id }}" {% if depzak == p.id %}selected="selected"{% endif %}>{{ p }}</option>			
+					{% endfor %}
+			</select>
+          </div>
+          <div class="large-3 medium-6 columns">
+          	<label><span style="color:white">Тип заявки:</span></label>
+			<select name="need_type">
+				<option value="0" {% if need_type == 0 %}selected="selected"{% endif %}>Все типы</option>
+					{% for value,text in type_list.items %}
+			   	<option value="{{ value }}" {% if need_type == value %}selected{% endif %}>{{ text }}</option>			
+					{% endfor %}
+			</select>
+          </div>
+          <div class="large-2 medium-6 columns">
+          	<button class="button" type="submit" value="search" name="submit" style="vertical-align:bottom">Найти</button>
+          	<a href="{% url 'atc:need' %}" class="button">Сброс</a>
+          	<input class="button success" type="submit" value="В Excel" name="submit">
+          </div>
+      </div>
+      
+      
+      
+    </div>
+
+</form>
+
+<ul class="vertical dropdown menu medium-horizontal" data-responsive-menu="drilldown medium-dropdown">
+        <li class="has-submenu"><a href="#">Заполнить новую заявку</a>
+            <ul class="submenu menu vertical" data-submenu>
+            	{% for value,text in type_list.items %}
+                <li><a href="{% url 'atc:need_add' value %}">{{ text }}</a></li>
+                {% endfor %}
+            </ul>
+        </li>
+        <li class="has-submenu"><a href="#">Фильтр</a>
+            <ul class="submenu menu vertical" data-submenu>
+                <li><a onClick='Today()'>Сегодня</a></li>
+                <li><a onClick='Tomorrow()'>Завтра</a></li>
+                <li><a onClick='ThisMonth()'>Текущий месяц</a></li>
+            </ul>
+        </li>
+</ul>
+
+
+ <table class="hover">
+  <thead>
+    <tr>
+      <th>№</th>
+      <th>ПЛ</th>
+      <th>Диспетчер</th>
+      <th>Время выезда</th>
+      <th>Место отправления</th>
+      <th>Маршрут</th>
+      <th>Тип заявки</th>
+      <th>Заказчик</th>
+      <th>Автор</th>
+      <th>Изменена</th>
+    </tr>
+  </thead>
+  <tbody>
+{% for need in needs %}
+	
+    <tr onClick='PlParam({{ need.id }})'>
+      <td id="td_{{ need.id }}" {% if need.status == 0 %} bgcolor="#BBDDFF" {% elif need.status == 1 %} bgcolor="#BBFFEE" {% elif need.status == 2 %} bgcolor="#FFDDDD" {% endif %} "><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.id }}</a></td>
+      	{% if group == 'atc' %}
+      		{% if need.putlist %}
+      		<td><a id="putlist_add_{{ need.id }}" data-open="PutlistModal">{{ need.putlist }}</a> <a id="putlist_rej_{{ need.id }}" class="alert button" style="color:white; display: none;" onclick="PlRej({{ need.id }})">-</a></td>
+      		{% else %}
+      		<td><div><a id="putlist_add_{{ need.id }}" data-open="PutlistModal" class="button">+</a> <a id="putlist_rej_{{ need.id }}" class="alert button" style="color:white" onclick="PlRej({{ need.id }})">-</a></td>
+      		{% endif %}
+      	{% else %}
+      	<td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.putlist }}</a></td>
+      	{% endif %}
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">
+      	{% if need.atc_author %}
+      		{% if need.atc_author.last_name %}
+      		{{ need.atc_author.last_name }} {{ need.atc_author.first_name }}
+      		{% else %}
+      		{{ need.atc_author }}
+      		{% endif %}
+      	{% endif %}
+      </a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.need_start_date | date:"d.m.y H:i" }}</a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.address }}</a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.route }}</a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.get_need_type_display }}</a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">{{ need.dep }}</a></td>
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">
+      	{% if need.author.last_name %}
+      	{{ need.author.last_name }} {{ need.author.first_name }}
+      	{% else %}
+      	{{ need.author }}
+      	{% endif %}
+      </a></td>
+      
+      <td><a href="{% url 'atc:need_edit' pk=need.id %}">
+      {% if need.need_create_date > expdate %}
+      <b><font color=green>Новая!</font></b>
+      {% else %}
+      {{ need.need_create_date | date:"d.m.y H:i" }}
+      {% endif %}
+      </a></td>
+   </tr>
+   
+ {% endfor %}
+  </tbody>
+ </table>
+
+
+<ul class="pagination text-center" role="navigation" aria-label="Pagination" data-page="6" data-total="16">
+	{% if needs.has_previous %}
+	<li class="pagination-previous"><a href="?page={{ needs.previous_page_number }}{% if request.GET.submit %}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&depzak={{ request.GET.depzak }}&need_type={{ request.GET.need_type }}&submit={{ request.GET.submit }}{% endif %}" aria-label="Previous page">Предыдущая <span class="show-for-sr">страница</span></a></li>
+	{% else %}
+ 	<li class="pagination-previous disabled">Предыдущая <span class="show-for-sr">страница</span></li>
+ 	{% endif %}
+ 			{% for page in needs.paginator.page_range %}
+                {% if page == needs.number %}
+                    <li class="current">{{ page }}</li>
+                {% else %}
+                    <li>
+                    	<a href="?page={{ page }}{% if request.GET.submit %}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&depzak={{ request.GET.depzak }}&need_type={{ request.GET.need_type }}&submit={{ request.GET.submit }}{% endif %}">{{ page }}</a> </li>
+                {% endif %}
+            {% endfor %}
+ 	{% if needs.has_next %}
+                <li class="pagination-next"><a href="?page={{ needs.next_page_number }}{% if request.GET.submit %}&start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&depzak={{ request.GET.depzak }}&need_type={{ request.GET.need_type }}&submit={{ request.GET.submit }}{% endif %}" aria-label="Next page">Следующая <span class="show-for-sr">страница</span></a></li>
+            {% else %}
+                <li class="pagination-next disabled">Следующая <span class="show-for-sr">страница</span></li>
+    {% endif %}
+</ul>
+</div>
+<br>
+
+
+<div class="reveal" id="PutlistModal" data-reveal>
+  		<h2>Путевой лист</h2>
+  		{% csrf_token %}
+  		<form>
+  		<input id="plistinp" type="text" name="putlist">
+  		<button id="plistbtn" type="button" class="success button">Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="plist_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+	
+<input type="hidden" id="tbl_id" value="0">
+
+{% endblock %}
+{% block block-js %}
+	<script src="{% static "js/vendor/foundation-datepicker.min.js" %}"></script>
+	<script src="{% static "js/vendor/foundation-datepicker.ru.js" %}"></script>
+	
+	<script>
+		$('.fdatepicker').fdatepicker({language:'ru'});	
+		$(function(){ $('#dp1').fdatepicker({language:'ru'}); });
+		$(function(){ $('#dp2').fdatepicker({language:'ru'}); });
+		
+
+		Date.prototype.daysInMonth = function() {
+				return 33 - new Date(this.getFullYear(), this.getMonth(), 33).getDate();
+		};
+		
+		//Установить текущий день
+		function Today() {
+			var now = new Date();
+			var nowY = now.getFullYear();
+			var nowM = now.getMonth();
+			var nowD = now.getDate();
+			var start_date = String(nowD)+'.'+String(nowM+1)+'.'+String(nowY)
+			var end_date = String(nowD)+'.'+String(nowM+1)+'.'+String(nowY)
+			$('#dp1').val(start_date)
+			$('#dp2').val(end_date)	
+		}
+		
+		//Установить завтрашний день
+		function Tomorrow() {
+			var now = new Date();
+			var nowY = now.getFullYear();
+			var nowM = now.getMonth();
+			var nowD = now.getDate();
+			var start_date = String(nowD+1)+'.'+String(nowM+1)+'.'+String(nowY)
+			var end_date = String(nowD+1)+'.'+String(nowM+1)+'.'+String(nowY)
+			$('#dp1').val(start_date)
+			$('#dp2').val(end_date)	
+		}
+		
+		//Установить текущий месяц
+		function ThisMonth() {
+			var now = new Date();
+			var nowY = now.getFullYear();
+			var nowM = now.getMonth();
+			var start_date = '01.'+String(nowM+1)+'.'+String(nowY)
+			var end_date = String(new Date().daysInMonth())+'.'+String(nowM+1)+'.'+String(nowY)
+			$('#dp1').val(start_date)
+			$('#dp2').val(end_date)	
+		}
+		
+		
+		//Функция идентификации путевого листа
+		function PlParam(id) {
+		$("#tbl_id").val(id);
+		if ($('#putlist_add_'+id).html() != '+') {
+			$('#plistinp').val($('#putlist_add_'+id).html());
+		} else {
+			$('#plistinp').val('');
+		}
+		}
+		
+		//Функция добавления путевого листа
+		$('#plistbtn').click(function(){
+			$.ajax({
+	            type: 'GET',
+	            url: '/atc/need/pl_add/',
+	            data: {pk: $("#tbl_id").val(), pl: $("#plistinp").val(), st: 1},
+	            success: function(data) {
+	            	if ($("#plistinp").val().length != 0) {
+	    				$('#putlist_add_'+$("#tbl_id").val()).removeClass("button");
+	    				$('#putlist_add_'+$("#tbl_id").val()).text(data);
+	    				$('#putlist_rej_'+$("#tbl_id").val()).hide();
+	    				$('#td_'+$("#tbl_id").val()).css("backgroundColor", "#BBFFEE");
+	    			} else {
+	    				$('#putlist_add_'+$("#tbl_id").val()).addClass("button");
+	    				$('#putlist_add_'+$("#tbl_id").val()).html('+');
+	    				$('#putlist_rej_'+$("#tbl_id").val()).show();
+	    				$('#td_'+$("#tbl_id").val()).css("backgroundColor", "#BBEEFF");
+	    			}
+	            	},
+			});
+			
+			$('#plist_close').trigger('click');
+		});
+		
+		//Функция отклонения путевого листа
+		function PlRej(id){
+			var r = confirm('Вы уверены, что хотите отклонить заявку?');
+			if (r == true) {
+				$.ajax({
+		            type: 'GET',
+		            url: '/atc/need/pl_add/',
+		            data: {pk: id, pl: 0, st: 2},
+		            success: function(data) {
+		            	$('#putlist_add_'+id).html('Отклонена!');
+		            	$('#putlist_add_'+id).removeClass("button");
+		            	$('#putlist_rej_'+id).hide();
+		            	$('#td_'+id).css("backgroundColor", "#FFDDDD");
+		            	},
+				});
+			}
+				
+			
+		}
+		
+		
+	</script>
+{% endblock %}

@@ -1,0 +1,577 @@
+{% extends "gtnn_main.html" %}
+{% load staticfiles %}
+{% block content %}
+
+
+
+
+
+
+<div class="column large-12" style="background-color: white; margin-bottom: 1rem; padding:0; box-shadow:0 0 10px">
+    <div class="large-12 column clearfix" style="background-color:#0079c2; color:white">
+    <div class="large-12 column">
+    <h2>Заявки на автотранспорт</h2>
+    {% if pk %}
+    <h4>№ {{ pk }} - {{ post.dep }} - {{ post.get_need_type_display }} {% if post.status == 2 %} - <b><font color="#FFAAAA">Заявка ОТКЛОНЕНА!</font></b>{% endif %}</h4>
+    {% else %}
+    <h4>Новая заявка</h4>
+    {% endif %}
+    </div>
+  	</div>
+  <form id="id_form" method="post" class="post-form">
+      {% csrf_token %}
+    <div class="row">
+    	<div class="large-2 medium-3 small-12 columns">
+    		<div data-sticky-container>
+    		 <div class="sticky" data-sticky data-stick-to="top" data-top-anchor="cont:top" data-btm-anchor="cont:bottom" data-options="marginTop:11;">
+    		 	<div class="column">
+    		 		<br>
+    		 		<input class="hidden" id="id_change" type="submit" value="change" name="submit" hidden="true"> <!-- Не удалять - кнопка смены подразделения для изменения формы -->  
+    		 		{% if user.profile.personal.dep == post.dep or user == post.author or pk is None %}
+    				<button class="success button" id="id_save" type="submit" value="save" name="submit" style="color:white">&emsp;Сохранить &nbsp;&nbsp;&nbsp;&nbsp;</button><br>
+    				{% endif %}
+    				<a href="{% url 'atc:need' %}" class="button">&emsp;&emsp;Выйти &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a><br>
+      				{% if pk %}
+					<a href=" {% url 'atc:word' pk %} " class="button secondary">Экспорт в Word</a>
+					{% if user.profile.personal.dep == post.dep or user == post.author%}
+      					<a href="{% url 'atc:need_copy' pk %}" class="button secondary" onclick="return confirm('На основе данной заявки будет создана новая. Продолжить?')">Копировать заявку</a>
+      					<br><br>
+      					{% if post.status == 0 %}
+      					<a href="{% url 'atc:need_del' pk %}" class="alert button" style="color:white" onclick="return confirm('Вы уверены, что хотите удалить заявку?')">Удалить заявку</a>
+      					{% endif %}
+      				{% endif %}
+					{% endif %}
+					<br>
+				</div>
+    		  </div>
+    		</div>
+    		&emsp;
+    	</div>
+    <div class="large-10 medium-9 small-12 columns" id="cont">
+      <table class="unstriped">
+      <thead>
+    	<tr>
+      		<th bgcolor="#ffffff" width="230"></th>
+      		<th bgcolor="#ffffff" width="300"></th>
+      		<th bgcolor="#ffffff"></th>
+    	</tr>
+  		</thead>
+       <tbody>
+       {{ form.need_type }}
+       {% for field in form.visible_fields %}
+       {% if field.id_for_label == "id_X" %}
+       <tr>
+       	<td align="right">
+       		<label for="id_X">Габариты груза (мм.):</label>
+       	</td>
+       	<td>
+       	<div class="row">
+       		<div class="large-4 medium-4 small-4 columns">
+       			длина:{{ field }}
+       		</div>
+       {% elif field.id_for_label == "id_Y" %}
+       		<div class="large-4 medium-4 small-4 columns">
+       			ширина:{{ field }}
+       		</div>
+       {% elif field.id_for_label == "id_Z" %}
+       		<div class="large-4 medium-4 small-4 columns">	
+       			высота:{{ field }}
+       		</div>
+  		</div>
+  		</td>
+       	<td></td>
+       </tr>
+       {% elif field.id_for_label == "id_car_head" %}
+       <tr>
+         <td align="right">{{ field.label_tag }} </td>
+         <td>{{ field }}
+       		Удостоверение №: <span id="car_head_cert_num"></span><br>
+       		Дата последней проверки знаний: <span id="car_head_cert_date"></span>
+         </td>
+         <td>
+         {% if role == 'write' %}
+         <a id="car_head_add" class="button" onclick="PersAddForm('car_head_new')">Добавить</a><br>
+         <a id="car_head_change" class="button secondary" onclick="PersChange('#id_car_head','car_head')" data-open="PersonalModal">Изменить</a><br>
+         {% endif %}
+       	</td>
+       </tr>
+       {% elif field.id_for_label == "id_slinger" %}
+       <tr>
+         <td align="right">{{ field.label_tag }} </td>
+         <td>{{ field }}
+       		Удостоверение №: <span id="slinger_cert_num"></span><br>
+       		Дата последней проверки знаний: <span id="slinger_cert_date"></span>
+         </td>
+         <td>
+         {% if role == 'write' %}
+         <a id="slinger_add" class="button" onclick="PersAddForm('slinger_new')">Добавить</a><br>
+         <a id="slinger_change" class="button secondary" onclick="PersChange('#id_slinger','slinger')" data-open="PersonalModal">Изменить</a><br>
+         {% endif %}
+       	</td>
+       </tr>
+       {% else %}
+        <tr>
+         <td align="right">{{ field.label_tag }} </td>
+         <td>{{ field }}</td>
+         <td>
+       {% if role == 'write' %}
+       {% if field.id_for_label == "id_address" %}
+       <a id="address_add" data-open="AdressModal" class="button"> Добавить</a>
+       {% elif field.id_for_label == "id_route" %}
+       <a id="route_add" data-open="RouteModal" class="button">Добавить</a>
+       {% elif field.id_for_label == "id_car" %}
+       <a id="car_add" data-open="CarModal" class="button">Добавить</a>
+       {% elif field.id_for_label == "id_purpose" %}
+       <a id="purp_add" data-open="PurpModal" class="button">Добавить</a>
+       {% endif %}
+       </td>
+       </tr>
+       {% endif %}
+       {% endif %}
+       {% endfor %}
+      </tbody>
+      </table>
+      </div>
+      <div class="large-2 columns">
+      </div>
+      </div>
+  </form>
+  		
+ 
+      <div class="reveal" id="AdressModal" data-reveal>
+  		<h2>Добавить адрес</h2>
+  		{% csrf_token %}
+  		<form>
+  		<input id="addressinp" type="text" required value="{{ Address.address_name }}" name="address_name">
+  		<button id="addressbtn" type="button" class="success button" disabled>Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="address_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+	
+	<div class="reveal" id="RouteModal" data-reveal>
+  		<h2>Добавить маршрут</h2>
+  		{% csrf_token %}
+  		<form>
+  		<input id="routeinp" type="text" required value="{{ Route.route_name }}" name="route_name">
+  		<button id="routebtn" type="button" class="success button" disabled>Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="route_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+
+	<div class="reveal" id="CarModal" data-reveal>
+  		<h2>Добавить транспортное средство</h2>
+  		{% csrf_token %}
+  		<form method="GET" id="carform" action="javascript:void(null);" onsubmit="addForm('/atc/need/car/add/','#carform','#id_car_name','#id_car')">
+  		{{ form1.as_p }}
+		<button id="carbtn" type="submit" class="success button">Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="car_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+	
+	<div class="reveal" id="PurpModal" data-reveal>
+  		<h2>Добавить цель</h2>
+  		{% csrf_token %}
+  		<form method="GET" id="purpform" action="javascript:void(null);" onsubmit="addForm('/atc/need/purpose/add/','#purpform','#id_purp_name','#id_purpose')">
+  		{{ form3.as_p }}
+		<button id="purpbtn" type="submit" class="success button">Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="purp_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+	
+	<div class="reveal" id="PersonalModal" data-reveal>
+  		<h2>Информация о сотруднике:</h2>
+  		<input class="hidden" id="pers_type" value="" type="hidden" hidden="true">
+  		{% csrf_token %}
+  		<form method="GET" id="personalform" action="javascript:void(null);">
+  		{{ form2.as_table }}
+		<button id="personalbtn" type="submit" class="success button">Сохранить</button>
+  		<button id="slowbtn" type="button" class="button" data-close>Отмена</button>
+  		<button id="personal_close" class="close-button" data-close aria-label="Close modal" type="button">
+    		<span aria-hidden="true">&times;</span>
+  		</button>
+  		</form>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block block-js %}
+<script src="{% static "js/vendor/foundation-datepicker.min.js" %}"></script>
+<script src="{% static "js/vendor/foundation-datepicker.ru.js" %}"></script>
+<script>
+
+
+////////////////////////////////////////////////////////////////////////
+//Функция, выполняемая при загрузке страницы
+$(window).load(function() {
+	PersChange('#id_car_head', 'car_head');
+	PersChange('#id_slinger', 'slinger');
+});
+
+	//Функция отправки формы модального окна и обновления списка выбора из указанного инпута
+function addForm(url,form,input,select){
+	var adname = $(input).val();
+	var msg = $(form).serialize();
+	var exists = false;
+	//Проверка наличия элемента в списке
+	$(select +' option').each(function(){
+		  if (this.value == adname) {
+		    exists = true;
+		  }
+		});
+	//Добавление нового элемента в начало списка
+	if(exists == true) {
+		alert('Такая запись уже существует!');
+    } else {
+    	$.ajax({
+            type: 'GET',
+            url: url,
+            data: msg,
+            success: function(data) {
+            	$(select).prepend('<option value="' + data + '">' + adname + '</option>')
+        		//Сортировка списка
+        		var options = $(select +' option');
+        				options.detach().sort(function(a,b) {
+            				var at = $(a).text();
+            				var bt = $(b).text();
+            				return (at > bt)?1:((at < bt)?-1:0);
+        				});
+        				options.appendTo(select);
+        		//Выбор нового элемента
+        		$(select + " [selected='selected']").removeAttr("selected");
+        		$(select + " [value='" + data + "']").attr("selected", "selected");
+            },
+            error:  function(xhr, str){
+  	    alert('Возникла ошибка: ' + xhr.responseCode);
+            }
+          });
+    	}
+	}
+
+
+
+//Функция обновления Select
+function NewOpt(value, text, select){
+	$(select).prepend('<option value="' + value + '">' + text + '</option>')
+	//Сортировка списка
+	var options = $(select +' option');
+			options.detach().sort(function(a,b) {
+				var at = $(a).text();
+				var bt = $(b).text();
+				return (at > bt)?1:((at < bt)?-1:0);
+			});
+			options.appendTo(select);
+	//Выбор нового элемента
+	$(select + " [selected='selected']").removeAttr("selected");
+	$(select + " [value='" + value + "']").attr("selected", "selected");
+};
+
+
+
+//Функция добавления нового элемента в список: (путь к представлению на сервере, откуда взять значение, куда вставить)
+function addOption(url,input,select){
+	var adname = $(input).val();
+	var exists = false;
+	//Проверка наличия элемента в списке
+	$(select +' option').each(function(){
+		  if (this.value == adname) {
+		    exists = true;
+		  }
+		});
+	//Добавление нового элемента в начало списка
+	if(exists == true) {
+		alert('Такая запись уже существует!');
+    } else {
+    	$.get(url, {value: adname}, function(data){
+    		$(select).prepend('<option value="' + data + '">' + adname + '</option>')
+    		//Сортировка списка
+    		var options = $(select +' option');
+    				options.detach().sort(function(a,b) {
+        				var at = $(a).text();
+        				var bt = $(b).text();
+        				return (at > bt)?1:((at < bt)?-1:0);
+    				});
+    				options.appendTo(select);
+    		//Выбор нового элемента
+    		$(select + " [selected='selected']").removeAttr("selected");
+    		$(select + " [value='" + data + "']").attr("selected", "selected");
+    	});
+    }
+}
+
+
+//Функция проверки пустого поля (если ничего не введено, то кнопка не активна)
+function checkParams(input, button) {
+    var address = $(input).val();
+    
+    if(address.length != 0) {
+        $(button).removeAttr('disabled');
+    } else {
+        $(button).attr('disabled', 'disabled');
+    }
+}
+
+//Функция проверки корректности даты отправления
+$('#id_need_start_date').change(function() {
+	var element=document.getElementById('id_need_finish_date');
+	if(element){
+		var s = $('#id_need_start_date').val();
+		var f = $('#id_need_finish_date').val();
+		var start_date = new Date(s.substr(6,4)+'/'+s.substr(3,2)+'/'+s.substr(0,2));
+		var finish_date = new Date(f.substr(6,4)+'/'+f.substr(3,2)+'/'+f.substr(0,2));
+		if (finish_date < start_date) {
+			$('#id_need_finish_date').val(s.substr(0,11)+'17:00');
+			start_date.setDate(start_date.getDate() + 7);
+			var l = start_date.getDate() + '.' + (start_date.getMonth() + 1) + '.' + start_date.getFullYear();
+			$('#id_latest_date').val(l.substr(0,11));
+		};
+	}; 
+	
+});
+
+//Функция проверки корректности даты возвращения
+$('#id_need_finish_date').change(function() {
+	var element=document.getElementById('id_need_finish_date');
+	if(element){
+		var s = $('#id_need_start_date').val();
+		var f = $('#id_need_finish_date').val();
+		var start_date = new Date(s.substr(6,4)+'/'+s.substr(3,2)+'/'+s.substr(0,2));
+		var finish_date = new Date(f.substr(6,4)+'/'+f.substr(3,2)+'/'+f.substr(0,2));
+		if (finish_date < start_date) {
+			$('#id_need_finish_date').val($('#id_need_start_date').val().substr(0,11)+'17:00');
+			alert( "Дата возвращения должна быть больше даты отправления" );
+			$('#id_need_finish_date').blur();
+			$('#id_need_start_date').trigger('click');
+		};
+	};
+	
+});
+
+//Только свои
+$('#id_only_our').change(function(event) {
+	var check
+	if ($('#id_only_our').prop("checked")==true) {
+		check = 1;
+	}
+	else {
+		check = 0;
+	}
+	$.ajax({
+        type: 'GET',
+        url: '/atc/need/only_our/',
+        data: {check: check, dep: $('#id_dep').val()},
+        success: function(data) {
+        	$('#id_car_head').empty();
+            $.each(data, function(index,value){
+            	$('#id_car_head').append('<option value="' + value['id'] + '">' + value['fio'] + '</option>');
+            });
+            $('#id_slinger').empty();
+            $.each(data, function(index,value){
+            	$('#id_slinger').append('<option value="' + value['id'] + '">' + value['fio'] + '</option>');
+            });
+            PersChange('#id_car_head', 'car_head');
+    		PersChange('#id_slinger', 'slinger');
+        }
+	});
+		
+});
+
+//Изменение формы (выбор другой службы)
+$('#id_dep').change(function(event) {
+	$("form").attr('novalidate', 'novalidate');
+	$('#id_change').trigger('click');
+});
+
+
+
+//Информация о сотруднике
+function PersChange(select, pers_type) {
+	$('#pers_type').val(pers_type);
+	var val = $(select + " :selected").val();
+	$.ajax({
+        type: 'GET',
+        url: '/atc/need/personal/'+val+'/',
+        data: {id: val},
+        success: function(data) {
+        			$('#id_fio').val(data.fio);
+                	$('#id_f').val(data.f);
+                	$('#id_i').val(data.i);
+                	$('#id_o').val(data.o);
+                	$('#id_login_name').val(data.login_name);
+                	$('#id_tab').val(data.tab);
+                	$('#id_dep_pers [value="' + data.dep + '"]').attr("selected", "selected");
+                	$('#id_profession').val(data.profession);
+                	$('#id_place [value="' + data.place + '"]').attr("selected", "selected");
+                	$('#id_telephone').val(data.telephone);
+                	$('#id_mail').val(data.mail);
+                	$('#id_cert_num').val(data.cert_num);
+                	$('#id_cert_date').val(data.cert_date);
+                	$('#'+pers_type+'_cert_num').text(data.cert_num);
+                	$('#'+pers_type+'_cert_date').text(data.cert_date);
+
+        }
+        });	
+	}
+	
+
+//Добавить сотрудника
+function PersAddForm(pers_type) {
+	$('#pers_type').val(pers_type);
+	$('#id_fio').val('');
+	$('#id_f').val('');
+	$('#id_i').val('');
+	$('#id_o').val('');
+	$('#id_login_name').val('');
+	$('#id_tab').val('');
+	$('#id_dep_pers [value="' + $('#id_dep').val() + '"]').attr("selected", "selected");
+	$('#id_profession').val('');
+	$('#id_place').val('');
+	$('#id_telephone').val('');
+	$('#id_mail').val('');
+	$('#id_cert_num').val('');
+	$('#id_cert_date').val('');
+	$('#PersonalModal').foundation('open');
+}
+
+//Запись информации о сотруднике
+$('#personalform').submit(function() {
+	var form = $('#personalform').serialize();
+	var val = 0;
+	if ($('#pers_type').val()=='car_head') {
+		val = $('#id_car_head option:selected').val();
+	};
+	if ($('#pers_type').val()=='slinger') {
+		val = $('#id_slinger option:selected').val();
+	};
+	$.ajax({
+		type: 'GET',
+        url: '/atc/need/personal/'+val+'/edit/',
+        data: form,
+        success: function(data) {
+        	if ($('#pers_type').val()=='car_head') {
+        		$('#id_car_head :selected').text(data.fio);
+        		$('#car_head_cert_num').text(data.cert_num);
+        		$('#car_head_cert_date').text(data.cert_date);
+        	};
+        	if ($('#pers_type').val()=='slinger') {
+        		$('#id_slinger :selected').text(data.fio);
+        		$('#slinger_cert_num').text(data.cert_num);
+        		$('#slinger_cert_date').text(data.cert_date);
+        	};
+        	if ($('#pers_type').val()=='car_head_new') {
+        		NewOpt(data.id, data.fio, '#id_car_head');
+        		$('#id_slinger').prepend('<option value="' + data.id + '">' + data.fio + '</option>');
+        		$('#car_head_cert_num').text(data.cert_num);
+        		$('#car_head_cert_date').text(data.cert_date);
+        	};
+        	if ($('#pers_type').val()=='slinger_new') {
+        		NewOpt(data.id, data.fio, '#id_slinger');
+        		$('#id_car_head').prepend('<option value="' + data.id + '">' + data.fio + '</option>');
+        		$('#slinger_cert_num').text(data.cert_num);
+        		$('#slinger_cert_date').text(data.cert_date);
+        	};
+        	},
+	});
+});
+
+
+
+//Автозаполнение ФИО
+$('#id_f').change(function(){
+	$('#id_fio').val($('#id_f').val()+' '+$('#id_i').val()+' '+$('#id_o').val());
+});
+$('#id_i').change(function(){
+	$('#id_fio').val($('#id_f').val()+' '+$('#id_i').val()+' '+$('#id_o').val());
+});
+$('#id_o').change(function(){
+	$('#id_fio').val($('#id_f').val()+' '+$('#id_i').val()+' '+$('#id_o').val());
+});
+
+
+//Заполнение значений номера удостоверения и даты последней проверки знаний
+$('#id_car_head').change(function(){
+	PersChange('#id_car_head', 'car_head');
+});
+$('#id_slinger').change(function(){
+	PersChange('#id_slinger', 'slinger');
+});
+
+
+
+
+
+$('#testbtn').click(function(){
+	var x = 2;
+	$('#id_test').text(x);
+});
+
+$('#address_add').click(function(){
+	//Очистка поля ввода
+	$('#addressinp').val('');
+	checkParams('#addressinp', '#addressbtn');
+});
+
+$('#route_add').click(function(){
+	$('#routeinp').val('');
+	checkParams('#routeinp', '#routebtn');
+});
+
+$('#car_add').click(function(){
+	$('#id_car_name').val('');
+});
+
+$('#purp_add').click(function(){
+	$('#id_purp_name').val('');
+	checkParams('#purpinp', '#purpbtn');
+});
+
+$('#addressinp').keyup(function(){checkParams('#addressinp', '#addressbtn')});
+$('#addressinp').keydown(function(){if(event.keyCode==13){$('#addressbtn').trigger('click')}});
+$('#addressbtn').click(function(){
+	addOption('/atc/need/address/add/','#addressinp','#id_address');
+	$('#address_close').trigger('click');
+});
+
+$('#routeinp').keyup(function(){checkParams('#routeinp', '#routebtn')});
+$('#routeinp').keydown(function(){if(event.keyCode==13){$('#routebtn').trigger('click')}});
+$('#routebtn').click(function(){
+	addOption('/atc/need/route/add/','#routeinp','#id_route');
+	$('#route_close').trigger('click');
+});
+
+$('#carbtn').click(function(){
+	$('#car_close').trigger('click');
+});
+
+$('#id_purp_name').keyup(function(){checkParams('#id_purp_name', '#purpbtn')});
+$('#id_purp_name').keydown(function(){if(event.keyCode==13){$('#purpbtn').trigger('click')}});
+$('#purpbtn').click(function(){
+	$('#purp_close').trigger('click');
+});
+
+$('#personalbtn').click(function(){
+	$('#personal_close').trigger('click');
+});
+
+
+
+$('.fdatepicker').fdatepicker({language:'ru'});
+$(function(){ $('#id_need_start_date').fdatepicker({format: 'dd.mm.yyyy hh:ii', disableDblClickSelection: true, language:'ru', pickTime: true}); });
+$(function(){ $('#id_need_finish_date').fdatepicker({format: 'dd.mm.yyyy hh:ii', disableDblClickSelection: true, language:'ru', pickTime: true}); });
+$(function(){ $('#id_latest_date').fdatepicker({format: 'dd.mm.yyyy', language:'ru'}); });
+$(function(){ $('#id_cert_date').fdatepicker({format: 'dd.mm.yyyy', language:'ru'}); });
+
+</script>
+{% endblock %}

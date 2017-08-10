@@ -1,0 +1,17 @@
+{% extends "gtnn_main.html" %}
+{% load staticfiles %}
+{% block content %}
+<div class="row">
+<div class="large-12 columns">
+<h2>Добавить адрес</h2>
+
+  <form method="post" class="post-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="success button">Сохранить</button>
+      <a href=" " class="button">Отмена</a>
+  </form>
+</div>
+</div>
+<br/>
+{% endblock %}
